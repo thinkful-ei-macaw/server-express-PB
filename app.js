@@ -8,15 +8,33 @@ app.use(morgan("common")); // let's see what 'common' format looks like
 const apps = require("./books-data");
 
 app.get("/apps", (req, res) => {
+  let results = [...apps];
   const { genre = "", sort } = req.query;
   if (sort) {
     if (!["App", "Rating"].includes(sort)) {
       return res.status(400).send("sort must be one of app or rating");
     }
   }
-  let results = apps.filter(app =>
-    app.Genres.toLowerCase().includes(genre.toLowerCase())
-  );
+  if (genre) {
+    if (
+      ![
+        "Adventure",
+        "Action & Adventure",
+        "Arcade",
+        "Casual",
+        "Card",
+        "Pretend Play",
+        "Action",
+        "Strategy",
+        "Puzzle"
+      ].includes(genre)
+    ) {
+      return res.status(400).send("must enter valid genre");
+    }
+    results = apps.filter(app =>
+      app.Genres.toLowerCase().includes(genre.toLowerCase())
+    );
+  }
 
   if (sort) {
     results.sort((a, b) => {
@@ -26,6 +44,4 @@ app.get("/apps", (req, res) => {
   res.json(results);
 });
 
-app.listen(8000, () => {
-  console.log("Server started on PORT 8000");
-});
+module.exports = app;
